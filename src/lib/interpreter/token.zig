@@ -1,39 +1,21 @@
 const std = @import("std");
 
-pub const Token = struct {
-    loc: Loc,
-    tag: Tag,
+pub const Token = union(enum) {
+    BREAK,
+    COMMA,
+    EOF,
+    EQUAL,
+    IDENTIFIER: []const u8,
+    STRING: []const u8,
 
-    pub const Loc = struct { beg: usize, end: usize };
-
-    pub const Tag = enum {
-        equal,
-        identifier,
-        invalid,
-
-        keyword_break,
-
-        const keywords = std.StaticStringMap(Tag).initComptime(.{
-            .{ "break", .keyword_break },
-        });
-
-        fn lexeme(tag: Tag) ?[]const u8 {
-            return switch (tag) {
-                .identifier, .invalid => null,
-                .equal => "=",
-            };
+    pub fn format(self: Token, comptime _: []const u8, _: std.fmt.FormatOptions, writer: anytype) !void {
+        switch (self) {
+            .BREAK => return writer.writeAll("break"),
+            .COMMA => return writer.writeAll(","),
+            .EOF => return writer.writeAll("<eof>"),
+            .EQUAL => return writer.writeAll("="),
+            .IDENTIFIER => |name| return writer.writeAll("identifier: '" ++ .{name} ++ "'"),
+            .STRING => |str| return writer.writeAll("string: '" ++ .{str} ++ "'"),
         }
-
-        pub fn symbol(tag: Tag) []const u8 {
-            return tag.lexeme() orelse switch (tag) {
-                .identifier => "an identifier",
-                .invalid => "invalid token",
-                else => unreachable,
-            };
-        }
-
-        pub fn getKeyword(bytes: []const u8) ?Tag {
-            return keywords.get(bytes);
-        }
-    };
+    }
 };
