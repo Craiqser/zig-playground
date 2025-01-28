@@ -30,7 +30,7 @@
         //    .lazy = false,
         //},
     },
-    .minimum_zig_version = "0.14.0",
+    .minimum_zig_version = "0.13.0",
     .name = "lang",
     // Specifies the set of files and directories that are included in this package.
     // Only files and directories listed here are included in the `hash` that

@@ -1,37 +1,32 @@
 const std = @import("std");
-const t = std.testing;
+
+const expectEqual = std.testing.expectEqual;
+const expectEqualStrings = std.testing.expectEqualStrings;
+
 const Token = @import("token.zig").Token;
 const Tokenizer = @import("tokenizer.zig").Tokenizer;
 
-const allocator = t.allocator;
-pub var arena = std.heap.ArenaAllocator.init(allocator);
+const allocator = std.testing.allocator;
+var arena = std.heap.ArenaAllocator.init(allocator);
 
-pub fn reset() void {
+fn reset() void {
     _ = arena.reset(.free_all);
 }
 
-fn expectTokens(src: []const u8, expected: []const Token) !void {
+pub fn expectTokens(src: []const u8, expected: []const Token) !void {
     defer reset();
     var tokenizer = Tokenizer.init(arena.allocator(), src);
 
     for (expected) |expected_token| {
         const actual_token = try tokenizer.next();
-        try t.expectEqualStrings(@tagName(expected_token), @tagName(actual_token));
+        try expectEqualStrings(@tagName(expected_token), @tagName(actual_token));
         switch (expected_token) {
-            .IDENTIFIER => |name| try t.expectEqualStrings(name, actual_token.IDENTIFIER),
-            .STRING => |str| try t.expectEqualStrings(str, actual_token.STRING),
-            else => try t.expectEqual(expected_token, actual_token),
+            .IDENTIFIER => |name| try expectEqualStrings(name, actual_token.IDENTIFIER),
+            .STRING => |str| try expectEqualStrings(str, actual_token.STRING),
+            else => try expectEqual(expected_token, actual_token),
         }
     }
 
     const eof_token = try tokenizer.next();
-    try t.expectEqual(.EOF, eof_token);
-}
-
-test "comma" {
-    try expectTokens(",", &.{.COMMA});
-}
-
-test "empty tokens" {
-    try expectTokens("", &.{});
+    try expectEqual(.EOF, eof_token);
 }
