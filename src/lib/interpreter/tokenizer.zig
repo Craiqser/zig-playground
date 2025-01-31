@@ -1,7 +1,7 @@
 const std = @import("std");
-const Token = @import("token.zig").Token;
+const tu = @import("testutil.zig");
 
-const expectTokens = @import("testutil.zig").expectTokens;
+const Token = @import("token.zig").Token;
 
 const Allocator = std.mem.Allocator;
 
@@ -52,12 +52,12 @@ pub const Tokenizer = struct {
 };
 
 test "tokens: empty" {
-    try expectTokens("", &.{});
-    try expectTokens("  ", &.{});
+    try tu.expectTokens("", &.{});
+    try tu.expectTokens("  \t\r\n\t  \t ", &.{});
 }
 
 test "tokens: single" {
-    try expectTokens(" , { }\t[ ]\r( ).\n", &.{
+    try tu.expectTokens(" , { }\t[ ]\r( ).\n", &.{
         .COMMA,
         .LEFT_BRACE,
         .RIGHT_BRACE,

@@ -1,7 +1,5 @@
 const std = @import("std");
-
-const expectEqual = std.testing.expectEqual;
-const expectEqualStrings = std.testing.expectEqualStrings;
+const t = std.testing;
 
 const Token = @import("token.zig").Token;
 const Tokenizer = @import("tokenizer.zig").Tokenizer;
@@ -15,18 +13,21 @@ fn reset() void {
 
 pub fn expectTokens(src: []const u8, expected: []const Token) !void {
     defer reset();
+
     var tokenizer = Tokenizer.init(arena.allocator(), src);
 
     for (expected) |expected_token| {
         const actual_token = try tokenizer.next();
-        try expectEqualStrings(@tagName(expected_token), @tagName(actual_token));
+
+        try t.expectEqualStrings(@tagName(expected_token), @tagName(actual_token));
+
         switch (expected_token) {
-            .IDENTIFIER => |name| try expectEqualStrings(name, actual_token.IDENTIFIER),
-            .STRING => |str| try expectEqualStrings(str, actual_token.STRING),
-            else => try expectEqual(expected_token, actual_token),
+            .IDENTIFIER => |name| try t.expectEqualStrings(name, actual_token.IDENTIFIER),
+            .STRING => |str| try t.expectEqualStrings(str, actual_token.STRING),
+            else => try t.expectEqual(expected_token, actual_token),
         }
     }
 
     const eof_token = try tokenizer.next();
-    try expectEqual(.EOF, eof_token);
+    try t.expectEqual(.EOF, eof_token);
 }
